@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using System.DirectoryServices.AccountManagement;
 
 namespace Login_Test.Controllers
 {
@@ -28,19 +29,21 @@ namespace Login_Test.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                string formattedUsername = _authService.FormatUsername(model.Username);
-
-                if (_authService.AuthenticateUser(formattedUsername, model.Password))
-                {
-                    await SignInUser(formattedUsername);
-                    return RedirectToLocal(returnUrl);
-                }
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                ViewData["ReturnUrl"] = returnUrl;
+                return View(model);
             }
-            ViewData["ReturnUrl"] = returnUrl;
-            return View(model);
+            var formattedUsername = _authService.FormatUsername(model.Username);
+            var isValidUser = _authService.AuthenticateUser(formattedUsername, model.Password);
+            if (!isValidUser)
+            {
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                ViewData["ReturnUrl"] = returnUrl;
+                return View(model);
+            }
+            await SignInUser(formattedUsername);
+            return RedirectToLocal(returnUrl);
         }
 
         [HttpPost]
@@ -62,18 +65,22 @@ namespace Login_Test.Controllers
         private async Task SignInUser(string username)
         {
             var userPrincipal = _authService.GetUserPrincipal(username);
-            var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, username),
-            new Claim("Department", _authService.GetUserDepartment(userPrincipal) ?? ""),
-            new Claim("Mail", _authService.GetUserMail(userPrincipal) ?? "")
-        };
-
+            var claims = CreateClaims(userPrincipal, username);
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity));
+        }
+
+        private List<Claim> CreateClaims(UserPrincipal userPrincipal, string username)
+        {
+            return new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, username),
+                new Claim("Department", _authService.GetUserDepartment(userPrincipal) ?? ""),
+                new Claim("Mail", _authService.GetUserMail(userPrincipal) ?? "")
+            };
         }
 
         private IActionResult RedirectToLocal(string returnUrl)

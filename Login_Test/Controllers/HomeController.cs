@@ -16,6 +16,7 @@ namespace Login_Test.Controllers
             _logger = logger;
         }
 
+        [RequireLogin]
         public IActionResult Index()
         {
             ViewBag.UserName = User.Identity.Name;
@@ -25,7 +26,6 @@ namespace Login_Test.Controllers
             return View();
         }
 
-        [RequireLogin]
         public IActionResult Privacy()
         {
             return View();

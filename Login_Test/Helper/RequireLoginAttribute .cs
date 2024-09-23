@@ -11,7 +11,7 @@ namespace Login_Test.Helper
         {
             var user = context.HttpContext.User;
 
-            if (!user.Identity.IsAuthenticated || !user.HasClaim(c => c.Type == "Department") || !user.HasClaim(c => c.Type == "Mail"))
+            if (!user.Identity.IsAuthenticated || !user.HasClaim(c => c.Type == "Mail"))
             {
                 var returnUrl = context.HttpContext.Request.Path + context.HttpContext.Request.QueryString;
                 context.Result = new RedirectToActionResult("Login", "Account", new { returnUrl });
