@@ -39,14 +39,14 @@ namespace Login_Test.Helper
             }
         }
 
-        public string GetUserDepartment(UserPrincipal user)
-        {
-            return user.GetUnderlyingObject() is DirectoryEntry de ? de.Properties["department"].Value?.ToString() : null;
-        }
-
         public string GetUserMail(UserPrincipal user)
         {
             return user.GetUnderlyingObject() is DirectoryEntry de ? de.Properties["mail"].Value?.ToString() : null;
+        }
+
+        public string GetUserDepartment(UserPrincipal user)
+        {
+            return user.GetUnderlyingObject() is DirectoryEntry de ? de.Properties["department"].Value?.ToString() : null;
         }
     }
 

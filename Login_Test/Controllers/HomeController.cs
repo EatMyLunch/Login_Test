@@ -26,7 +26,14 @@ namespace Login_Test.Controllers
             return View();
         }
 
-        public IActionResult Privacy()
+        public IActionResult About()
+        {
+            return View();
+        }
+
+        [RequireLogin]
+        [Authorize(Policy = "Admin")]
+        public IActionResult Admin()
         {
             return View();
         }
