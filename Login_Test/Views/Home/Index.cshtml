@@ -8,3 +8,55 @@
     <p>Email: @ViewBag.Mail</p>
     <p>Department: @ViewBag.Department</p>
 </div>
+
+<div class="row mt-4">
+    <div class="col-md-6 offset-md-3">
+        <form asp-action="SubmitUser" method="post">
+            <div class="form-group">
+                <label for="userSelect">Select User:</label>
+                <select id="userSelect" name="selectedUserId" class="form-control"></select>
+            </div>
+            <button type="submit" class="btn btn-primary mt-2">Submit</button>
+        </form>
+    </div>
+</div>
+
+@if (TempData["SelectedWindowsUsername"] != null)
+{
+    <div class="row mt-4">
+        <div class="col-md-6 offset-md-3">
+            <div class="alert alert-success">
+                Selected Windows Username: @TempData["SelectedWindowsUsername"]
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#userSelect').select2({
+                placeholder: 'Search for a user',
+                minimumInputLength: 2,
+                ajax: {
+                    url: '@Url.Action("GrabData", "Home")',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            search: params.term
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data.results
+                        };
+                    },
+                    cache: true
+                }
+            });
+        });
+    </script>
+}
